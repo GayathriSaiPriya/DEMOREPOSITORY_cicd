@@ -1,0 +1,28 @@
+name: Deploy Project #workflow name
+run-name: Validate SDF Project #Name while running the workflow
+on: [push] #this declares the workflow when to trigger
+jobs: #A workflow can contain multiple jobs
+  	sdf-validate:
+    	runs-on: ubuntu-latest #defines on which server this flow should run
+    	steps: #A single job can contain multiple steps
+        - name: Check out repository code
+          uses: actions/checkout@v3
+        - name: Install node
+          uses: actions/setup-node@v3
+          with:
+            node-version: 'lts/*'
+        - name: Install JDK
+          uses: actions/setup-java@v3
+          with:
+            java-version: '17'
+            distribution: 'oracle'
+        - name: Install package
+          run: npm install -g ----acceptsuitecloudsdklicense @oracle/suitecloud-cli --save-dev
+        - name: Install Jest
+          run: npm install --acceptsuitecloudsdklicense jest --save-dev
+        - name: Run unit tests
+          run: npm test
+        - name: Authenticate project against ${{ vars.NS_ACCOUNT_ID }}
+          run: ./node_modules/.bin/suitecloud account:savetoken --account ${{ vars.NS_ACCOUNT_ID }} --authid ${{ vars.NS_AUTH_ID }} --tokenid ${{ secrets.NS_TOKEN_ID }} --tokensecret ${{ secrets.NS_TOKEN_SECRET }} --url ${{vars.NET_URL}}
+      # - name: Deploy Project
+      #   run: suitecloud project:deploy		
